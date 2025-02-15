@@ -114,7 +114,7 @@ class CharacterFeature:
         
         return df_search_results
     
-    def get_serifu(self, target=0, save_search_result=False):
+    def get_serifu(self, targets=[0], save_search_result=False):
         search_results = self.get_search_results()
         
         if save_search_result:
@@ -131,12 +131,15 @@ class CharacterFeature:
                                      header=True,
                                      encoding="utf-8")
             pd.read_csv(output_csv, index_col=0)
-            
-        searched_target_url = search_results["url"][target]
-        page_content = self._get_page_content(searched_target_url)
-        serifu_data = self._extract_serifu_with_gemini(page_content)
         
-        return serifu_data
+        serifu_datas = []
+        for target in targets:
+            searched_target_url = search_results["url"][target]
+            page_content = self._get_page_content(searched_target_url)
+            serifu_data = self._extract_serifu_with_gemini(page_content)
+            serifu_datas += serifu_data
+        
+        return serifu_datas
 
 
 def test_usecase():

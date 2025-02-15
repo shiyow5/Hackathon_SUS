@@ -65,12 +65,12 @@ def invoke(model_name, text):
 
 # すべてのチューニングを取得
 for o in genai.list_operations():
-    print(o.name)
+    print(o.name, o.done())
 
 #plot_logloss("tunedModels/giaccho-2853/operations/xfev5862vk6b")
 #delete_model("giaccho-202502160124")
 
-#print(invoke("giaccho-5994", "お元気ですか？"))
+#print(invoke("zundamon-202502160245", "好きな食べ物は何？"))
 
 """characte_name = "ジョジョ ギアッチョ"
 cf = CharacterFeature(characte_name)    

@@ -1,14 +1,18 @@
 import streamlit as st
 import time
+import json
+import pandas as pd
 from collections import OrderedDict
+
+from CharacterChat.my_lib.search_character import CharacterFeature
+from CharacterChat.my_lib.fine_tuning import save_serifu_data
+from CharacterChat.my_lib.fine_tuning import create_model
+from CharacterChat.my_lib.fine_tuning import get_train_state
 
 
 # [0]は表示名
-char_data = [
-    {"char_name": "ずんだもん", "model_name": "zundamon1"},
-    {"char_name": "どらえもん", "model_name": "doraemon"},
-    {"char_name": "ずんだもん", "model_name": "zundamon2"}
-]
+with open("datas/model_datas.json", "r", encoding="utf-8") as f:
+    char_data = json.load(f)
 
 
 def page_output():
@@ -41,15 +45,16 @@ if "name" not in st.session_state:
     st.session_state.name = ""
 
 
-def serch_function(user_input = None): # ダミー
-    data = [
-        {"text": "Google", "url": "https://www.google.com"},
-        {"text": "YouTube", "url": "https://www.youtube.com"},
-        {"text": "GitHub", "url": "https://github.com"},
-        {"text": "OpenAI", "url": "https://openai.com"},
-        {"text": "Streamlit", "url": "https://streamlit.io"},
-    ]
+def serch_function(user_input = None):
+    cf = CharacterFeature(user_input)
+    result = cf.get_search_results()
+    
+    data = []
+    for title, url in zip(result["title"], result["url"]):
+        data.append({"text": title, "url": url})
+    
     return data
+
 
 def get_message(model_name):
     message1 = [{"role": "user", "content": "こんにちは"},
@@ -64,7 +69,6 @@ def menu():
     st.session_state.input = user_input
     if st.button("Search") and user_input:
         st.session_state.data = serch_function(user_input)
-        st.write(user_input) # 消して
     if st.session_state.data and st.session_state.input:
         checkbox(st.session_state.data)
 
@@ -81,16 +85,18 @@ def checkbox(data):
                 st.session_state.checked[item["text"]] = False
             st.session_state.checked[item["text"]] = st.checkbox("", value=st.session_state.checked[item["text"]], key=item["text"])
     
-    selected_links = [item["url"] for item in data if st.session_state.checked[item["text"]]]
+    #selected_links = [item["url"] for item in data if st.session_state.checked[item["text"]]]
+    selected_links = []
+    for id, item in enumerate(data):
+        if st.session_state.checked[item["text"]]:
+            selected_links.append(id)
 
     if st.button("Start learning!", disabled=bool(not selected_links)):
         with st.spinner("Wait for it..."):
             time.sleep(3)
-        success = -1 # start_train(selected_links)
-        if success == -1:
-            st.error("Currently, training another character.")
-        else:
-            st.success("Please wait for it to appear in the Character section.")
+        st.success("Please wait for it to appear in the Character section.")
+        model_name = save_serifu_data(characte_name=st.session_state.input, targets=selected_links)
+        create_model(characte_name=st.session_state.input, model_name=model_name, serifu_filename=f"{model_name}.json")
 
 
 def chat(name = "ずんだもん", model_name = "zundamon1"):
