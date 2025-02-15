@@ -94,15 +94,11 @@ def checkbox(data):
 
 
 def chat(name = "ずんだもん", model_name = "zundamon1"):
-    left, _, right = st.columns(3)
-    if left.button("Reset", type="primary") or "messages" not in st.session_state:
-        st.session_state.messages = []
-    else:
+    # セッションステートを初期化
+    if st.button("Reset", type="primary") or "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": f"現在のキャラクター：{name}."}] 
+    elif name != st.session_state.name:
         st.session_state.messages = get_message(model_name)
-
-    if model_name != "zundamon1":
-        if right.button("delete this model"):
-            delete(model_name)
 
     # メッセージ履歴を表示
     st.info(f"現在のキャラ： {name}")
@@ -122,16 +118,10 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
         response = f"Echo: {prompt}"
 
         # AIのメッセージを履歴に追加
-
+        st.session_state.messages.append({"role": "assistant", "content": response})
         # チャットメッセージとして表示
         with st.chat_message("assistant"):
             st.markdown(response)
-
-@st.dialog("本当に削除しますか？")
-def delete(model):
-    if st.button("YES. Delete.", type="primary"):
-        pass # delete(model)
-        st.rerun()
 
 if __name__ == "__main__":
     page_output()
