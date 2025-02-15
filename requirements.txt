@@ -1,0 +1,8 @@
+requests
+pandas
+google-api-python-client
+python-dotenv
+beautifulsoup4
+google-generativeai
+langchain
+langchain-google-genai
