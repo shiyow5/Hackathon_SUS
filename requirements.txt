@@ -8,3 +8,4 @@ google-generativeai
 langchain
 langchain-google-genai
 pykakasi
+langchain_community
