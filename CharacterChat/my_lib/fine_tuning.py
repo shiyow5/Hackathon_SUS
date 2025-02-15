@@ -48,12 +48,12 @@ class CharacterTuning:
                     train_data.append({'text_input': text_input, 'output': output})
         
         if save:
-            with open(f"{self.model_name}.json", "w", encoding="utf-8") as f:
+            with open(f"datas/for_fine_tuning/{self.model_name}.json", "w", encoding="utf-8") as f:
                 json.dump(train_data, f, ensure_ascii=False, indent=2)
         
         return train_data
         
-    def get_model(self, train_data=None):
+    def get_model(self, train_data=None, debug=False):
         if train_data:
             batch_size = int(len(train_data) * 0.3)
             base_model = genai.get_base_model('models/gemini-1.5-flash-001-tuning')
@@ -65,8 +65,9 @@ class CharacterTuning:
                 batch_size = batch_size if batch_size < 64 else 64,
                 learning_rate = 0.001,
             )
-            for status in operation.wait_bar():
-                time.sleep(30)
+            if debug:
+                for status in operation.wait_bar():
+                    time.sleep(30)
             
         else:
             operation = genai.get_operation(self.model_name)
@@ -121,7 +122,7 @@ def save_serifu_data(characte_name):
 def create_model(characte_name, model_name, serifu_filename):
     ct = CharacterTuning(characte_name, model_name)
     
-    with open(serifu_filename, "r", encoding="utf-8") as f:
+    with open(f"datas/for_fine_tuning/{serifu_filename}", "r", encoding="utf-8") as f:
         training_data = json.load(f)
 
     ct.get_model(training_data)
