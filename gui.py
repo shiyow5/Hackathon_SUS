@@ -1,41 +1,44 @@
 import streamlit as st
 import time
+from collections import OrderedDict
 
 
 # [0]は表示名
 char_data = [
-    {"char_name": "ずんだもん", "model_name": "zundamon"},
-    {"char_name": "どらえもん"}
+    {"char_name": "ずんだもん", "model_name": "zundamon1"},
+    {"char_name": "どらえもん", "model_name": "doraemon"},
+    {"char_name": "ずんだもん", "model_name": "zundamon2"}
 ]
 
 
 def page_output():
     # サイドバーのメニューセクション
-    st.sidebar.write("### Main Menu")
+    st.sidebar.write("# Main Menu")
     menu_selected = st.sidebar.radio("Select an option", ["Search & Learning", "Characters"])
 
-    # キャラクターセクションを表示（"characters" が選択された場合）
-    page_selected = None
+    # キャラクターセクションを表示（"Characters" が選択された場合）
     if menu_selected == "Characters":
         st.sidebar.markdown("---")  # 区切り線
         st.sidebar.write("### Choose a Character")
-        page_selected = st.sidebar.radio("", [p["char_name"] for p in char_data])
+        char_names = list(OrderedDict((p["char_name"], None) for p in char_data).keys())
+        selected_char = st.sidebar.radio(f"If the search names are the same,choose a version.", char_names)
+        matching_models = [p["model_name"] for p in char_data if p["char_name"] == selected_char]
+        selected_model = st.sidebar.radio("choose version of the model", matching_models) if len(matching_models) > 1 else matching_models[0]
 
     if menu_selected == "Search & Learning":
-        # st.session_state.input = False
         menu()
-    elif page_selected:
-        chat(page_selected)
+    elif selected_char:
+        chat(selected_char, selected_model)
 
 
 if "input" not in st.session_state:
     st.session_state.input = ""
-if "search" not in st.session_state:
-    st.session_state.search = False
 if "data" not in st.session_state:
     st.session_state.data = []
 if "checked" not in st.session_state:
     st.session_state.checked = {}
+if "name" not in st.session_state:
+    st.session_state.name = ""
 
 
 def serch_function(user_input = None): # ダミー
@@ -48,17 +51,23 @@ def serch_function(user_input = None): # ダミー
     ]
     return data
 
+def get_message(model_name):
+    message1 = [{"role": "user", "content": "こんにちは"},
+               {"role": "assistant", "content": "はい、こんにちはなのだ"}]
+    if model_name == "zundamon1":
+        return message1
+    return  []
 
 
 def menu():
     user_input = st.text_input("Enter you need char", value=st.session_state.input, placeholder="ずんだもん")
     st.session_state.input = user_input
     if st.button("Search") and user_input:
-        st.session_state.search = True
         st.session_state.data = serch_function(user_input)
         st.write(user_input) # 消して
     if st.session_state.data and st.session_state.input:
         checkbox(st.session_state.data)
+
 
 def checkbox(data):
     # 表の作成
@@ -83,14 +92,16 @@ def checkbox(data):
         else:
             st.success("Please wait for it to appear in the Character section.")
 
-    
 
-def chat(name = "ずんだもん", model_name = None):
+def chat(name = "ずんだもん", model_name = "zundamon1"):
     # セッションステートを初期化
-    if "messages" not in st.session_state or st.button("Reset", type="primary"):
-        st.session_state.messages = [{"role": "assistant", "content": f"My name is {name}."}]
-    
+    if st.button("Reset", type="primary") or "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": f"現在のキャラクター：{name}."}] 
+    elif name != st.session_state.name:
+        st.session_state.messages = get_message(model_name)
+
     # メッセージ履歴を表示
+    st.info(f"現在のキャラ： {name}")
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
