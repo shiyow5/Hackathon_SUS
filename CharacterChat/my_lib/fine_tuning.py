@@ -90,6 +90,13 @@ class CharacterTuning:
         result = model.generate_content(response.text)
         
         return result.text
+    
+    
+def get_train_state():
+    for o in genai.list_operations():
+        if not o.done():
+            return -1
+    return 0
 
 
 def to_roman_alphabet(text):
@@ -105,9 +112,9 @@ def to_roman_alphabet(text):
     return romaji
 
 
-def save_serifu_data(characte_name):
+def save_serifu_data(characte_name, targets=[0]):
     cf = CharacterFeature(characte_name)    
-    serifu_data = cf.get_serifu()
+    serifu_data = cf.get_serifu(targets=targets)
     
     timezone_jst = timezone(timedelta(hours=+9), 'JST')
     now = datetime.now(timezone_jst)
@@ -117,6 +124,8 @@ def save_serifu_data(characte_name):
     ct = CharacterTuning(characte_name, model_name)
 
     ct.convert_serifu2train(serifu_data)
+    
+    return model_name
 
 
 def create_model(characte_name, model_name, serifu_filename):
@@ -126,6 +135,13 @@ def create_model(characte_name, model_name, serifu_filename):
         training_data = json.load(f)
 
     ct.get_model(training_data)
+    
+    with open("datas/model_datas.json", "r", encoding="utf-8") as f:
+        models = json.load(f)
+    models.append({"char_name": characte_name, "model_name": model_name})
+    
+    with open("datas/model_datas.json", "w", encoding="utf-8") as f:
+        json.dump(models, f, ensure_ascii=False, indent=2)
 
 
 def test_usecase1():
@@ -135,6 +151,6 @@ def test_usecase1():
 
 def test_usecase2():
     chara_name = "ずんだもん"
-    model_name = "zundamon-202502160245"
-    serifu_filename = "zundamon-202502160245.json"
+    model_name = "zundamon-special"
+    serifu_filename = "zundamon-special.json"
     create_model(chara_name, model_name, serifu_filename)
