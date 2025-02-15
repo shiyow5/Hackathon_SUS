@@ -12,7 +12,7 @@ import google.generativeai as genai
 from google.api_core.exceptions import ResourceExhausted
 import google.auth
 
-from search_character import CharacterFeature
+from .search_character import CharacterFeature
 
 
 credentials, _ = google.auth.default()
