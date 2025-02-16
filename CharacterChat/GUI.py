@@ -102,7 +102,7 @@ def checkbox(data):
 def chat(name = "ずんだもん", model_name = "zundamon1"):
     left, _, right = st.columns(3)
     if left.button("Reset", type="primary") or "messages" not in st.session_state:
-        st.session_state.messages = []
+        st.session_state.messages = sql.reset_messages(model_name)
     else:
         st.session_state.messages = sql.get_messages(model_name)
 
