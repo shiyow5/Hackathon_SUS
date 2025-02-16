@@ -13,6 +13,7 @@ from googleapiclient.discovery import build
 from langchain_google_genai import GoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.output_parsers import StrOutputParser
 
 
 load_dotenv(find_dotenv())
@@ -26,6 +27,7 @@ class CharacterFeature:
     def __init__(self, name):
         self.character_name = name
         self.search_query = f"{name} セリフ一覧"
+        self.feature_query = f"{name} wikipedia"
         
     def _search_by_google(self, query, start_index=1):
         # Google Custom Search API
@@ -94,9 +96,37 @@ class CharacterFeature:
     
         return response
     
-    def get_search_results(self):
+    def _extract_feature_with_gemini(self, text):
+        # Gemini モデルの準備
+        llm = GoogleGenerativeAI(model="gemini-2.0-flash", api_key=CharacterFeature.GEMINI_KEY)
+    
+        # プロンプトを定義
+        system_template = """
+            以下のinputはwebページから抽出した{chara}に関する文章です。{chara}の性格や特徴と思われる記述を取り出してください。
+            出力は{chara}の性格や特徴を列挙したもののみとしてください。
+            input：
+            """
+        prompt_template = ChatPromptTemplate.from_messages([
+            ("system", system_template),
+            ("user", "{text}")
+        ])
+
+        # 出力パーサーを作成
+        parser = StrOutputParser()
+    
+        chain = prompt_template | llm | parser
+    
+        input_data = {"chara": self.character_name, "text": text}
+        response = chain.invoke(input_data)
+    
+        return response
+    
+    def get_search_results(self, serifu=True):
         # Google検索 - Custom Search API
-        data = self._search_by_google(self.search_query)
+        if serifu:
+            data = self._search_by_google(self.search_query)
+        else:
+            data = self._search_by_google(self.feature_query)
         
         # Google検索結果から任意の項目抽出 & rank付与
         items = data["items"]
@@ -115,7 +145,7 @@ class CharacterFeature:
         return df_search_results
     
     def get_serifu(self, targets=[0], save_search_result=False):
-        search_results = self.get_search_results()
+        search_results = self.get_search_results(serifu=True)
         
         if save_search_result:
             # ExecDate
@@ -140,14 +170,32 @@ class CharacterFeature:
             serifu_datas += serifu_data
         
         return serifu_datas
+    
+    def get_feature(self, target=0):
+        search_results = self.get_search_results(serifu=False)
+        
+        searched_target_url = search_results["url"][target]
+        page_content = self._get_page_content(searched_target_url)
+        feature_data = self._extract_feature_with_gemini(page_content)
+        
+        return feature_data
 
 
-def test_usecase():
-    characte_name = "ずんだもん"
-    cf = CharacterFeature(characte_name)
+def test_usecase1():
+    character_name = "ずんだもん"
+    cf = CharacterFeature(character_name)
     
     serifu_data = cf.get_serifu()
     
     save_path = "/home/satosho/GoogleHackathon/Hackathon_SUS/test.json"
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump(serifu_data, f, ensure_ascii=False, indent=2)
+
+
+def test_usecase2():
+    character_name = "ずんだもん"
+    cf = CharacterFeature(character_name)
+    
+    feature_data = cf.get_feature()
+    
+    print(feature_data)
