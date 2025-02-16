@@ -10,3 +10,5 @@ langchain-google-genai
 pykakasi
 langchain_community
 streamlit
+pydub
+simpleaudio
