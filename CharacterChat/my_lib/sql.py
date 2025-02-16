@@ -43,9 +43,10 @@ def reset_messages(name):
     conn = sqlite3.connect("datas/chat_history/memory.db")
     cursor = conn.cursor()
 
-    cursor.execute("UPDATE messages SET conversation = '' WHERE name = ?", (name,))
+    cursor.execute("UPDATE messages SET conversation = ? WHERE name = ?", ('[]', name))
     
     conn.commit()
     conn.close()
+
 
 create_table()
