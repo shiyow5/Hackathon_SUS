@@ -63,9 +63,21 @@ def invoke(model_name, text):
     return result.text
 
 
+def get_train_state():
+    for o in genai.list_operations():
+        if not o.done():
+            operation = genai.get_operation(o.name)
+            for status in operation.wait_bar():
+                time.sleep(30)
+            return -1
+    return 0
+
+
 # すべてのチューニングを取得
 for o in genai.list_operations():
     print(o.name, o.done())
+    
+get_train_state()
 
 #plot_logloss("tunedModels/giaccho-2853/operations/xfev5862vk6b")
 #delete_model("giaccho-202502160124")

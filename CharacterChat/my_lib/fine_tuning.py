@@ -15,12 +15,11 @@ import google.auth
 from .search_character import CharacterFeature
 
 
-credentials, _ = google.auth.default()
-genai.configure(credentials=credentials)
-
-
 class CharacterTuning:
     def __init__(self, characte_name, model_name):
+        credentials, _ = google.auth.default()
+        genai.configure(credentials=credentials)
+        
         self.characte_name = characte_name
         self.model_name = model_name
         self.simple_llm = genai.GenerativeModel("gemini-2.0-flash")
@@ -133,8 +132,6 @@ def create_model(characte_name, model_name, serifu_filename):
     
     with open(f"datas/for_fine_tuning/{serifu_filename}", "r", encoding="utf-8") as f:
         training_data = json.load(f)
-
-    ct.get_model(training_data)
     
     with open("datas/model_datas.json", "r", encoding="utf-8") as f:
         models = json.load(f)
@@ -142,6 +139,8 @@ def create_model(characte_name, model_name, serifu_filename):
     
     with open("datas/model_datas.json", "w", encoding="utf-8") as f:
         json.dump(models, f, ensure_ascii=False, indent=2)
+
+    ct.get_model(training_data)
 
 
 def test_usecase1():
