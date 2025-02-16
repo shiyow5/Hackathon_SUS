@@ -1,10 +1,18 @@
 [
-    {
-        "char_name": "ずんだもん",
-        "model_name": "zundamon-202502160245"
-    },
-    {
-        "char_name": "ギアッチョ",
-        "model_name": "giaccho-202502160141"
-    }
+  {
+    "char_name": "ずんだもん",
+    "model_name": "zundamon-202502160245"
+  },
+  {
+    "char_name": "ずんだもん",
+    "model_name": "zundamon-special"
+  },
+  {
+    "char_name": "ギアッチョ",
+    "model_name": "giaccho-202502160142"
+  },
+  {
+    "char_name": "アクセラレータ",
+    "model_name": "akuserareeta-202502160810"
+  }
 ]

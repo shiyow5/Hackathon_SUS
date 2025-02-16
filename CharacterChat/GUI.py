@@ -5,9 +5,9 @@ import pandas as pd
 from collections import OrderedDict
 
 from CharacterChat.my_lib.search_character import CharacterFeature
+from CharacterChat.my_lib.fine_tuning import CharacterTuning
 from CharacterChat.my_lib.fine_tuning import save_serifu_data
 from CharacterChat.my_lib.fine_tuning import create_model
-from CharacterChat.my_lib.fine_tuning import get_train_state
 
 
 # [0]は表示名
@@ -85,7 +85,6 @@ def checkbox(data):
                 st.session_state.checked[item["text"]] = False
             st.session_state.checked[item["text"]] = st.checkbox("", value=st.session_state.checked[item["text"]], key=item["text"])
     
-    #selected_links = [item["url"] for item in data if st.session_state.checked[item["text"]]]
     selected_links = []
     for id, item in enumerate(data):
         if st.session_state.checked[item["text"]]:
@@ -106,7 +105,7 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
     else:
         st.session_state.messages = get_message(model_name)
 
-    if model_name != "zundamon1":
+    if model_name != "zundamon-202502160245":
         if right.button("delete this model"):
             delete(model_name)
 
@@ -125,10 +124,13 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
             st.markdown(prompt)
 
         # AIからの応答を生成 (ここでは例としてユーザーの入力をそのまま返す)
-        response = f"Echo: {prompt}"
+        cf = CharacterTuning(characte_name=name, model_name=model_name)
+        response = cf.invoke(prompt)
 
         # AIのメッセージを履歴に追加
-
+        
+        st.session_state.messages.append({"role": "asistant", "content": response})
+        
         # チャットメッセージとして表示
         with st.chat_message("assistant"):
             st.markdown(response)
@@ -136,7 +138,15 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
 @st.dialog("本当に削除しますか？")
 def delete(model):
     if st.button("YES. Delete.", type="primary"):
-        pass # delete(model)
+        ct = CharacterTuning(characte_name="", model_name=model)
+        ct.delete_model()
+        with open("datas/model_datas.json", "r", encoding="utf-8") as f:
+            model_datas = json.load(f)
+        for model_data in model_datas:
+            if model_data["model_name"]==model:
+                model_datas.remove(model_data)
+        with open("datas/model_datas.json", "w", encoding="utf-8") as f:
+            json.dump(model_datas, f, ensure_ascii=False, indent=2)
         st.rerun()
 
 if __name__ == "__main__":
