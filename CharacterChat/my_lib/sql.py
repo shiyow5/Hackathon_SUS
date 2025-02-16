@@ -37,13 +37,13 @@ def get_messages(name):
 
     conn.close()
 
-    return json.loads(row[0]) if row else []
+    return json.loads(row[0]) if row and row[0] else []
 
 def reset_messages(name):
     conn = sqlite3.connect("datas/chat_history/memory.db")
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM messages WHERE name = ?", (name,))
+    cursor.execute("UPDATE messages SET conversation = '' WHERE name = ?", (name,))
     
     conn.commit()
     conn.close()
