@@ -9,6 +9,7 @@ python -m streamlit run CharacterChat/GUI.py
 - **Google_API_Key**
 - **Google_Custom_Search_Engine_Id**
 - **Gemini_API_Key**
+- **VOICEVOX_API_KEY**
 
 の設定が必要です。  
 ※ google cloud のアカウントが必要です。
