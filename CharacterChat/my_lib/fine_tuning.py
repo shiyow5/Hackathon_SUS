@@ -16,11 +16,14 @@ from .search_character import CharacterFeature
 
 
 class CharacterTuning:
-    def __init__(self, characte_name, model_name):
+    def __init__(self, character_name, model_name):
+        cf = CharacterFeature(character_name)
+        self.character_feature = cf.get_feature()
+        
         credentials, _ = google.auth.default()
         genai.configure(credentials=credentials)
         
-        self.characte_name = characte_name
+        self.character_name = character_name
         self.model_name = model_name
         self.simple_llm = genai.GenerativeModel("gemini-2.0-flash")
         
@@ -83,10 +86,20 @@ class CharacterTuning:
         plt.show()
         
     def invoke(self, text):
-        response = self.simple_llm.generate_content(text)
+        query = f"""あなたは{self.character_name}です。{self.character_name}になりきって会話してください。
+                {self.character_name}の特徴は以下の通りです。：{self.character_feature}
+                以下の内容に答えてください。：{text}
+            """
+        response = self.simple_llm.generate_content(query)
         
-        model = genai.GenerativeModel(model_name=f'tunedModels/{self.model_name}')
-        result = model.generate_content(response.text)
+        try:
+            model = genai.GenerativeModel(model_name=f'tunedModels/{self.model_name}')
+            result = model.generate_content(response.text)
+            return result.text
+        
+        except ValueError as e:
+            print(f"ポリシー違反の可能性あり-> {e}")
+            result = response
         
         return result.text
     
@@ -111,31 +124,31 @@ def to_roman_alphabet(text):
     return romaji
 
 
-def save_serifu_data(characte_name, targets=[0]):
-    cf = CharacterFeature(characte_name)    
+def save_serifu_data(character_name, targets=[0]):
+    cf = CharacterFeature(character_name)    
     serifu_data = cf.get_serifu(targets=targets)
     
     timezone_jst = timezone(timedelta(hours=+9), 'JST')
     now = datetime.now(timezone_jst)
     time_tag = now.strftime('%Y%m%d%H%M')
     
-    model_name=f"{to_roman_alphabet(characte_name)}-{time_tag}"
-    ct = CharacterTuning(characte_name, model_name)
+    model_name=f"{to_roman_alphabet(character_name)}-{time_tag}"
+    ct = CharacterTuning(character_name, model_name)
 
     ct.convert_serifu2train(serifu_data)
     
     return model_name
 
 
-def create_model(characte_name, model_name, serifu_filename):
-    ct = CharacterTuning(characte_name, model_name)
+def create_model(character_name, model_name, serifu_filename):
+    ct = CharacterTuning(character_name, model_name)
     
     with open(f"datas/for_fine_tuning/{serifu_filename}", "r", encoding="utf-8") as f:
         training_data = json.load(f)
     
     with open("datas/model_datas.json", "r", encoding="utf-8") as f:
         models = json.load(f)
-    models.append({"char_name": characte_name, "model_name": model_name})
+    models.append({"char_name": character_name, "model_name": model_name})
     
     with open("datas/model_datas.json", "w", encoding="utf-8") as f:
         json.dump(models, f, ensure_ascii=False, indent=2)

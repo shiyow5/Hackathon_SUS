@@ -94,8 +94,8 @@ def checkbox(data):
         with st.spinner("Wait for it..."):
             time.sleep(3)
         st.success("Please wait for it to appear in the Character section.")
-        model_name = save_serifu_data(characte_name=st.session_state.input, targets=selected_links)
-        create_model(characte_name=st.session_state.input, model_name=model_name, serifu_filename=f"{model_name}.json")
+        model_name = save_serifu_data(character_name=st.session_state.input, targets=selected_links)
+        create_model(character_name=st.session_state.input, model_name=model_name, serifu_filename=f"{model_name}.json")
 
 
 def chat(name = "ずんだもん", model_name = "zundamon1"):
@@ -124,7 +124,7 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
             st.markdown(prompt)
 
         # AIからの応答を生成 (ここでは例としてユーザーの入力をそのまま返す)
-        cf = CharacterTuning(characte_name=name, model_name=model_name)
+        cf = CharacterTuning(character_name=name, model_name=model_name)
         response = cf.invoke(prompt)
 
         # AIのメッセージを履歴に追加
@@ -138,7 +138,7 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
 @st.dialog("本当に削除しますか？")
 def delete(model):
     if st.button("YES. Delete.", type="primary"):
-        ct = CharacterTuning(characte_name="", model_name=model)
+        ct = CharacterTuning(character_name="", model_name=model)
         ct.delete_model()
         with open("datas/model_datas.json", "r", encoding="utf-8") as f:
             model_datas = json.load(f)
