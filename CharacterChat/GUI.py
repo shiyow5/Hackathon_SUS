@@ -8,6 +8,7 @@ from CharacterChat.my_lib.search_character import CharacterFeature
 from CharacterChat.my_lib.fine_tuning import CharacterTuning
 from CharacterChat.my_lib.fine_tuning import save_serifu_data
 from CharacterChat.my_lib.fine_tuning import create_model
+import CharacterChat.my_lib.sql as sql
 
 
 # [0]は表示名
@@ -103,7 +104,7 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
     if left.button("Reset", type="primary") or "messages" not in st.session_state:
         st.session_state.messages = []
     else:
-        st.session_state.messages = get_message(model_name)
+        st.session_state.messages = sql.get_messages(model_name)
 
     if model_name != "zundamon-202502160245":
         if right.button("delete this model"):
@@ -128,9 +129,8 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
         response = cf.invoke(prompt)
 
         # AIのメッセージを履歴に追加
-        
         st.session_state.messages.append({"role": "asistant", "content": response})
-        
+        sql.save_messages(model_name, st.session_state.messages)
         # チャットメッセージとして表示
         with st.chat_message("assistant"):
             st.markdown(response)
