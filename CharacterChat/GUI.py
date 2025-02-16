@@ -8,6 +8,8 @@ from CharacterChat.my_lib.search_character import CharacterFeature
 from CharacterChat.my_lib.fine_tuning import CharacterTuning
 from CharacterChat.my_lib.fine_tuning import save_serifu_data
 from CharacterChat.my_lib.fine_tuning import create_model
+
+import CharacterChat.my_lib.sql as sql
 from CharacterChat.my_lib.voicevox import VoiceVox
 
 
@@ -101,10 +103,9 @@ def checkbox(data):
 
 def chat(name = "ずんだもん", model_name = "zundamon1"):
     left, _, right = st.columns(3)
-    if left.button("Reset", type="primary") or "messages" not in st.session_state:
-        st.session_state.messages = []
-    else:
-        st.session_state.messages = get_message(model_name)
+    if left.button("Reset", type="primary"):
+        messages = sql.reset_messages(model_name)
+    messages = sql.get_messages(model_name)
 
     if model_name != "zundamon-202502160245":
         if right.button("delete this model"):
@@ -112,14 +113,14 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
 
     # メッセージ履歴を表示
     st.info(f"現在のキャラ： {name}")
-    for message in st.session_state.messages:
+    for message in messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
     # ユーザーからの入力を受け取る
     if prompt := st.chat_input("What is up?", key="chat_input"):
         # ユーザーのメッセージを履歴に追加
-        st.session_state.messages.append({"role": "user", "content": prompt})
+        messages.append({"role": "user", "content": prompt})
         # チャットメッセージとして表示
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -127,11 +128,11 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
         # AIからの応答を生成 (ここでは例としてユーザーの入力をそのまま返す)
         cf = CharacterTuning(character_name=name, model_name=model_name)
         response = cf.invoke(prompt)
+        # response = prompt
 
         # AIのメッセージを履歴に追加
-        
-        st.session_state.messages.append({"role": "asistant", "content": response})
-        
+        messages.append({"role": "asistant", "content": response})
+        sql.save_messages(model_name, messages)
         # チャットメッセージとして表示
         with st.chat_message("assistant"):
             st.markdown(response)
