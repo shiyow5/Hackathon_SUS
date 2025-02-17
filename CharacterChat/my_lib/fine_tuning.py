@@ -12,7 +12,7 @@ import google.generativeai as genai
 from google.api_core.exceptions import ResourceExhausted
 import google.auth
 
-from .search_character import CharacterFeature
+from my_lib.search_character import CharacterFeature
 
 
 class CharacterTuning:
