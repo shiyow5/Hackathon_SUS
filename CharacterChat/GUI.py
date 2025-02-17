@@ -10,7 +10,6 @@ from my_lib.fine_tuning import save_serifu_data
 from my_lib.fine_tuning import create_model
 
 from my_lib import sql
-from my_lib.voicevox import VoiceVox
 
 
 # [0]は表示名
@@ -136,10 +135,6 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
         # チャットメッセージとして表示
         with st.chat_message("assistant"):
             st.markdown(response)
-        
-        # ずんだもんにしゃべらせる
-        vv = VoiceVox()
-        vv.speak(response)
 
 @st.dialog("本当に削除しますか？")
 def delete(model):
