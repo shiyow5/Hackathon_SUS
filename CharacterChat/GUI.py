@@ -4,13 +4,13 @@ import json
 import pandas as pd
 from collections import OrderedDict
 
-from CharacterChat.my_lib.search_character import CharacterFeature
-from CharacterChat.my_lib.fine_tuning import CharacterTuning
-from CharacterChat.my_lib.fine_tuning import save_serifu_data
-from CharacterChat.my_lib.fine_tuning import create_model
+from my_lib.search_character import CharacterFeature
+from my_lib.fine_tuning import CharacterTuning
+from my_lib.fine_tuning import save_serifu_data
+from my_lib.fine_tuning import create_model
 
-import CharacterChat.my_lib.sql as sql
-from CharacterChat.my_lib.voicevox import VoiceVox
+from my_lib import sql
+from my_lib.voicevox import VoiceVox
 
 
 # [0]は表示名
