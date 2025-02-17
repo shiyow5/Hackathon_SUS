@@ -20,9 +20,9 @@ load_dotenv(find_dotenv())
 
 
 class CharacterFeature:
-    API_KEY = os.getenv("Google_API_Key")
-    CSE_ID = os.getenv("Google_Custom_Search_Engine_Id")
-    GEMINI_KEY = os.getenv("Gemini_API_Key")
+    API_KEY = os.environ["Google_API_Key"]
+    CSE_ID = os.environ["Google_Custom_Search_Engine_Id"]
+    GEMINI_KEY = os.environ["Gemini_API_Key"]
     
     def __init__(self, name):
         self.character_name = name
