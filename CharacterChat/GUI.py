@@ -1,7 +1,6 @@
 import streamlit as st
 import time
 import json
-import pandas as pd
 from collections import OrderedDict
 
 from CharacterChat.my_lib.search_character import CharacterFeature
@@ -13,7 +12,6 @@ import CharacterChat.my_lib.sql as sql
 from CharacterChat.my_lib.voicevox import VoiceVox
 
 
-# [0]は表示名
 with open("datas/model_datas.json", "r", encoding="utf-8") as f:
     char_data = json.load(f)
 
@@ -44,8 +42,6 @@ if "data" not in st.session_state:
     st.session_state.data = []
 if "checked" not in st.session_state:
     st.session_state.checked = {}
-if "name" not in st.session_state:
-    st.session_state.name = ""
 
 
 def serch_function(user_input = None):
@@ -57,14 +53,7 @@ def serch_function(user_input = None):
         data.append({"text": title, "url": url})
     
     return data
-
-
-def get_message(model_name):
-    message1 = [{"role": "user", "content": "こんにちは"},
-               {"role": "assistant", "content": "はい、こんにちはなのだ"}]
-    if model_name == "zundamon1":
-        return message1
-    return  []
+    
 
 
 def menu():
@@ -141,6 +130,7 @@ def chat(name = "ずんだもん", model_name = "zundamon1"):
         vv = VoiceVox()
         vv.speak(response)
 
+
 @st.dialog("本当に削除しますか？")
 def delete(model):
     if st.button("YES. Delete.", type="primary"):
@@ -154,6 +144,7 @@ def delete(model):
         with open("datas/model_datas.json", "w", encoding="utf-8") as f:
             json.dump(model_datas, f, ensure_ascii=False, indent=2)
         st.rerun()
+
 
 if __name__ == "__main__":
     page_output()
